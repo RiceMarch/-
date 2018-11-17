@@ -1,0 +1,129 @@
+#include <iostream>
+#define MVNum 20
+#define VerTexType char
+
+
+/*
+6 6
+A B C D E F
+A B
+A C
+B D
+C D
+D E
+C F
+*/
+using namespace std;
+
+typedef struct otherinfo
+{
+    int in_degree;
+    int out_degree;
+    int degree;
+} otherinfo;
+
+typedef struct ArcNode  //边界点
+{
+    int adjvex;
+    struct ArcNode *nextarc;
+    //otherinfo info;
+} ArcNode;
+
+typedef struct VNode//定义每一个定点
+{
+    VerTexType data;
+    ArcNode *firstarc;
+    otherinfo info;
+} VNode,AdjList[MVNum]; ///不应该写成*AdjList[MVNum]；
+///因为挂上一个*就相当于不限制与空间的指针；
+///但是它本身想定义一个限制空间大小的数组；
+
+typedef struct ALG//邻接表，构成图
+{
+    AdjList vertices;
+    int vexnum,arcnum;
+} ALGraph;
+
+int LocateVex(ALGraph G,VerTexType v)
+{
+    for(int i = 0; i<G.vexnum ; ++i)
+    {
+        if(G.vertices[i].data== v)
+            return i;
+    }
+    return -1;
+}
+
+bool CreateUDG(ALGraph &G)
+{
+    cin>>G.vexnum>>G.arcnum;
+
+    for(int i = 0; i < G.vexnum; i++)
+    {
+        cin >> G.vertices[i].data;
+        G.vertices[i].firstarc = NULL;
+    }
+    //构造表
+    for(int k = 0 ; k < G.arcnum ; k++)
+    {
+        VerTexType v1,v2;
+        cin>>v1>>v2;
+        int i = LocateVex(G,v1);
+        int j = LocateVex(G,v2);
+
+        ArcNode *p1 = new ArcNode;
+        p1->adjvex = j;
+        p1->nextarc = G.vertices[i].firstarc;
+        G.vertices[i].firstarc = p1;
+
+        ArcNode *p2 = new ArcNode;
+        //p2->adjvex = i;
+        //p2->nextarc = G.vertices[j].firstarc;
+        //G.vertices[j].firstarc = p2;
+    }
+    return true;
+}
+
+void NUM_degree(ALGraph &G)
+{   int a[G.vexnum-1];
+    for(int i=0; i<G.vexnum;i++)
+    a[i]=0;
+    for(int i=0; i<G.vexnum; i++)
+    {
+        VNode temp = G.vertices[i];
+        ArcNode *p = temp.firstarc;
+        G.vertices[i].info.in_degree = 0;
+
+        if(p!=NULL)
+        while(1)
+        {
+            a[p->adjvex]++;
+            G.vertices[i].info.in_degree++;
+           if(p->nextarc == NULL)
+            break;
+
+            p = p->nextarc;
+        }
+        //G.vertices[i].info.degree=G.vertices[i].info.in_degree+G.vertices[i].info.out_degree;
+    }
+    for(int i=0;i<G.vexnum;i++)
+    G.vertices[i].info.out_degree=a[i];
+}
+
+int main()
+{
+    ALGraph G;
+    CreateUDG(G);
+    NUM_degree(G);
+    for(int i = 0; i<G.vexnum; i++)
+    {
+
+        VNode temp = G.vertices[i];
+        cout<<temp.data<<" ";
+        cout<<temp.info.out_degree<<" ";
+        cout<<temp.info.in_degree<<" ";
+        cout<<temp.info.in_degree+temp.info.out_degree<<"\n";
+    }
+    // cout << "Hello world!" << endl;
+    return 0;
+}
